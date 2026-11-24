@@ -1,0 +1,17 @@
+{
+    "name": "Copix",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Plataforma B2B de conciliação financeira para pagamentos Pix",
+    "workspaces": [
+      "apps/*"
+    ],
+    "scripts": {
+      "infra:up": "docker compose up -d",
+      "infra:down": "docker compose down",
+      "infra:logs": "docker compose logs -f"
+    },
+    "engines": {
+      "node": ">=20.0.0"
+    }
+  }
