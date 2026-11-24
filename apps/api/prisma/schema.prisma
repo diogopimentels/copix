@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PapelMembro {
+  ADMIN
+  OPERADOR
+}
+
+enum StatusCobranca {
+  PENDENTE
+  PAGA
+  EXPIRADA
+  CANCELADA
+}
+
+enum StatusPagamento {
+  RECEBIDO
+  ESTORNADO
+}
+
+enum TipoProvedor {
+  SIMULADOR
+}
+
+enum TipoLancamento {
+  CREDITO
+  DEBITO
+}
+
+enum StatusConciliacao {
+  CONCILIADO
+  DIVERGENTE
+  PENDENTE
+}
+
+model Usuario {
+  id           String   @id @default(cuid())
+  nome         String
+  email        String   @unique
+  senhaHash    String
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  membros    MembroOrganizacao[]
+  auditorias RegistroAuditoria[]
+}
+
+model Organizacao {
+  id           String   @id @default(cuid())
+  nome         String
+  documento    String   @unique
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  membros       MembroOrganizacao[]
+  provedores    Provedor[]
+  cobrancas     Cobranca[]
+  pagamentos    Pagamento[]
+  lancamentos   Lancamento[]
+  conciliacoes  Conciliacao[]
+  auditorias    RegistroAuditoria[]
+}
+
+model MembroOrganizacao {
+  id             String      @id @default(cuid())
+  usuarioId      String
+  organizacaoId  String
+  papel          PapelMembro @default(OPERADOR)
+  criadoEm       DateTime    @default(now())
+
+  usuario     Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  organizacao Organizacao @relation(fields: [organizacaoId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, organizacaoId])
+  @@index([organizacaoId])
+}
+
+model Provedor {
+  id             String       @id @default(cuid())
+  organizacaoId  String
+  nome           String
+  tipo           TipoProvedor @default(SIMULADOR)
+  ativo          Boolean      @default(true)
+  chaveWebhook   String
+  criadoEm       DateTime     @default(now())
+  atualizadoEm   DateTime     @updatedAt
+
+  organizacao    Organizacao     @relation(fields: [organizacaoId], references: [id], onDelete: Cascade)
+  pagamentos     Pagamento[]
+  eventosWebhook EventoWebhook[]
+
+  @@index([organizacaoId])
+}
+
+model Cobranca {
+  id             String         @id @default(cuid())
+  organizacaoId  String
+  txid           String         @unique
+  valorCentavos  Int
+  descricao      String
+  status         StatusCobranca @default(PENDENTE)
+  vencimentoEm   DateTime?
+  pagoEm         DateTime?
+  criadoEm       DateTime       @default(now())
+  atualizadoEm   DateTime       @updatedAt
+
+  organizacao  Organizacao   @relation(fields: [organizacaoId], references: [id], onDelete: Cascade)
+  pagamentos   Pagamento[]
+  conciliacoes Conciliacao[]
+
+  @@index([organizacaoId, status])
+}
+
+model Pagamento {
+  id             String          @id @default(cuid())
+  organizacaoId  String
+  provedorId     String
+  cobrancaId     String?
+  endToEndId     String          @unique
+  txid           String?
+  valorCentavos  Int
+  status         StatusPagamento @default(RECEBIDO)
+  payloadBruto   Json
+  recebidoEm     DateTime
+  criadoEm       DateTime        @default(now())
+
+  organizacao  Organizacao   @relation(fields: [organizacaoId], references: [id], onDelete: Cascade)
+  provedor     Provedor      @relation(fields: [provedorId], references: [id], onDelete: Cascade)
+  cobranca     Cobranca?     @relation(fields: [cobrancaId], references: [id], onDelete: SetNull)
+  conciliacoes Conciliacao[]
+
+  @@index([organizacaoId])
+  @@index([txid])
+}
+
+model EventoWebhook {
+  id           String   @id @default(cuid())
+  provedorId   String
+  assinatura   String
+  payload      Json
+  processado   Boolean  @default(false)
+  erro         String?
+  criadoEm     DateTime @default(now())
+
+  provedor Provedor @relation(fields: [provedorId], references: [id], onDelete: Cascade)
+
+  @@index([provedorId, processado])
+}
+
+model Lancamento {
+  id              String         @id @default(cuid())
+  organizacaoId   String
+  tipo            TipoLancamento
+  valorCentavos   Int
+  descricao       String
+  referenciaTipo  String
+  referenciaId    String
+  criadoEm        DateTime       @default(now())
+
+  organizacao Organizacao @relation(fields: [organizacaoId], references: [id], onDelete: Cascade)
+
+  @@index([organizacaoId])
+  @@index([referenciaTipo, referenciaId])
+}
+
+model Conciliacao {
+  id               String            @id @default(cuid())
+  organizacaoId    String
+  cobrancaId       String?
+  pagamentoId      String?
+  status           StatusConciliacao @default(PENDENTE)
+  motivoDivergencia String?
+  conciliadoEm     DateTime?
+  criadoEm         DateTime          @default(now())
+  atualizadoEm     DateTime          @updatedAt
+
+  organizacao Organizacao @relation(fields: [organizacaoId], references: [id], onDelete: Cascade)
+  cobranca    Cobranca?   @relation(fields: [cobrancaId], references: [id], onDelete: SetNull)
+  pagamento   Pagamento?  @relation(fields: [pagamentoId], references: [id], onDelete: SetNull)
+
+  @@unique([cobrancaId, pagamentoId])
+  @@index([organizacaoId, status])
+}
+
+model RegistroAuditoria {
+  id            String   @id @default(cuid())
+  organizacaoId String?
+  usuarioId     String?
+  acao          String
+  entidade      String
+  entidadeId    String?
+  metadados     Json?
+  criadoEm      DateTime @default(now())
+
+  organizacao Organizacao? @relation(fields: [organizacaoId], references: [id], onDelete: SetNull)
+  usuario     Usuario?     @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+
+  @@index([organizacaoId, criadoEm])
+}
