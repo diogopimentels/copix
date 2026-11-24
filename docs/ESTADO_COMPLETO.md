@@ -1,7 +1,7 @@
 # Copix — estado completo do projeto
 
 Documento detalhado do que existe hoje no repositório.  
-Gerado em **24/11/2026**, branch `main`, commit `635ec4d`.
+Atualizado em **24/11/2026**, branch `main` (pós BFF HttpOnly + UX listagens).
 
 Complementa:
 
@@ -338,14 +338,15 @@ Layout autenticado:
 
 - sidebar fixa no desktop / drawer no mobile
 - header com seletor de organização + sair
-- `GuardaAuth` bloqueia sem token ou com sessão inválida
+- `GuardaAuth` bloqueia sem sinal de sessão (`copix_sessao`) ou com `/auth/eu` inválido
 
 ### 4.4 Camada de API no client
 
 `lib/api/cliente.ts` → `requisitarApi<T>()`:
 
-- base `NEXT_PUBLIC_API_URL`
-- injeta Bearer do `localStorage`
+- base `/api/bff` (browser → Next → Nest)
+- auth em `/api/auth/entrar|registrar|sair` (seta/limpa cookies)
+- JWT só no cookie HttpOnly `copix_acesso`; Nest continua com Bearer
 - lança `ErroApi` com status e mensagem do Nest
 
 Serviços tipados:
@@ -382,52 +383,52 @@ Invalidação de cache após mutações relevantes (ex.: simular Pix invalida co
 - demo credencial só como texto auxiliar (campos começam vazios)
 
 #### Dashboard
-- saldo do razão
-- totais de cobranças/pagamentos/divergências
-- gráfico de pagamentos recentes (série montada no client a partir da lista real)
+- saldo do razão + taxa de conciliação (`painel`)
+- atalhos “o que fazer agora” (divergências / pendentes)
+- gráfico de pagamentos recentes (série client a partir da lista atual — documentado)
 - tabelas das últimas cobranças e conciliações
-- estados loading / erro / empty
 
 #### Cobranças
-- form Zod (descrição + valor BRL → centavos)
-- busca por descrição/txid
-- filtro por status
-- paginação client-side
-- botão **Simular Pix** em pendentes
+- criar em dialog (Zod: descrição + valor BRL → centavos)
+- detalhe via drawer (`GET /cobrancas/:id`)
+- busca/filtro em `searchParams`, paginação client-side
+- **Simular Pix** com `ConfirmDialog` + loading por linha
 
 #### Pagamentos
-- busca por end-to-end / txid / provedor
+- busca por end-to-end / txid / provedor (`?q=`)
 - badge de status (`RECEBIDO` / `ESTORNADO`)
-- paginação client-side
+- paginação client-side + tabela responsiva
 
 #### Conciliações
 - cards do painel (conciliadas / pendentes / divergentes)
-- comparação visual valor cobrado × valor pago
-- filtro por status
+- coluna **delta**, motivo em evidência, drawer do par
+- filtro `?status=` + paginação
 - ação **Executar conciliação**
 
 #### Lançamentos
 - resumo crédito/débito/saldo
-- filtro tipo + busca
-- extrato com referência
+- filtro tipo + busca em `searchParams`
+- extrato paginado
 
 #### Auditoria
 - busca por ação/entidade/usuário
 - deixa claro que a API devolve no máx. 100 eventos
+- paginação client-side
 
 #### Configurações
 - dados da conta
 - criar organização (CNPJ 14 dígitos)
-- listar provedores + chave webhook
-- criar novo simulador
+- listar provedores + `chaveWebhook` **mascarada** (copiar/revelar)
+- criar novo simulador com confirmação
 - membros **somente leitura** (API não tem invite)
 
-### 4.6 Auth no browser (trade-off atual)
+### 4.6 Auth no browser (atual)
 
-- token em `localStorage` (`copix_token`)
-- enviado como Bearer
-- documentado em ADR 001
-- evolução prevista: BFF Next com cookie HttpOnly, **sem mudar contrato Nest**
+- BFF Next: cookies `copix_acesso` (HttpOnly) + `copix_sessao` (sinal UX)
+- browser não guarda JWT em `localStorage`
+- Nest intacto (`Authorization: Bearer` só no hop Next→API)
+- ADR 001 marcado como superseded
+- CSRF: SameSite=Lax + same-origin (sem token CSRF dedicado ainda)
 
 ### 4.7 Qualidade frontend
 
@@ -435,9 +436,9 @@ Invalidação de cache após mutações relevantes (ex.: simular Pix invalida co
 |---|---|
 | `web:lint` | passando |
 | `web:typecheck` | passando |
-| `web:test` (Vitest) | 6 testes |
+| `web:test` (Vitest) | sessão, máscara, paginação, form, empty |
 | `web:test:e2e` (Playwright) | 2 fluxos (login/nav + cobrança/simular/conciliar) |
-| `web:build` | passando (14 rotas) |
+| `web:build` | passando |
 | CI | `.github/workflows/ci.yml` (lint, typecheck, test, build) |
 
 E2E depende de API + web no ar:
@@ -458,7 +459,7 @@ PLAYWRIGHT_SKIP_WEBSERVER=1 npm run web:test:e2e
 
 - filtros/paginação só no client (API lista tudo)
 - DateRangePicker dedicado ainda não entrou (vencimento usa `datetime-local`)
-- sem BFF/cookie HttpOnly ainda
+- sem token CSRF dedicado (SameSite=Lax cobre o caso same-site)
 - sem dark mode productizado
 - screenshots oficiais no README ainda não gerados
 - convite de membros / permissões por papel na UI não existem porque a API não expõe
@@ -530,11 +531,13 @@ a3caaf8 docs: documenta o estado atual do mvp
 - webhook HMAC + simulador
 - razão + conciliação + auditoria
 - frontend SaaS com rotas, design system, Query, forms, testes e CI
+- BFF Next + cookie HttpOnly (Nest intacto)
+- listagens com primitives compartilhados + searchParams
 - documentação operacional
 
 ### Próximos saltos naturais
-1. BFF + cookie HttpOnly
-2. paginação/filtros na API
+1. paginação/filtros na API
+2. token CSRF dedicado (se origem cross-site entrar no mapa)
 3. Redis de verdade (fila de webhooks / cache)
 4. testes de API + mais E2E
 5. deploy (Dockerfiles + staging)

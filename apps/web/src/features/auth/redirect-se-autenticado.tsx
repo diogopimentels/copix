@@ -2,13 +2,13 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { lerToken } from '@/lib/api';
+import { temSinalSessao } from '@/lib/api';
 
 export function RedirectSeAutenticado() {
   const router = useRouter();
 
   useEffect(() => {
-    if (lerToken()) {
+    if (temSinalSessao()) {
       router.replace('/dashboard');
     }
   }, [router]);

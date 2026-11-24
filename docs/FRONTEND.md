@@ -41,8 +41,8 @@ src/
 - Servidor: TanStack Query (`useCobrancas`, `useDashboard`, …)
 - UI global: Zustand (`organizacaoId`, menu)
 - Forms: React Hook Form + Zod
-- Auth: Bearer + `localStorage` (ADR 001)
-- Sessão: `requisitarApi` encerra sessão em 401/403 (toast + redirect `/login`)
+- Auth: BFF Next (`/api/auth/*` + `/api/bff/*`) com cookie HttpOnly (ADR 001 superseded)
+- Sessão: 401/403 limpa cookies, toast e redirect `/login`
 - Listagens: filtro/paginação no **client** (`useListaPaginada` + `searchParams`); série do dashboard documentada como “últimos N da lista atual”
 - Segredos: `chaveWebhook` mascarada por padrão (`SegredoMascarado`)
 - Ações sensíveis: `ConfirmDialog` (simular Pix, criar provedor)

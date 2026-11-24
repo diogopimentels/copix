@@ -4,7 +4,7 @@ import { useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePerfil } from '@/hooks/use-auth';
-import { lerToken, limparToken } from '@/lib/api';
+import { limparToken, temSinalSessao } from '@/lib/api';
 
 type Props = {
   children: ReactNode;
@@ -13,21 +13,23 @@ type Props = {
 export function GuardaAuth({ children }: Props) {
   const router = useRouter();
   const { isLoading, isError, isSuccess } = usePerfil();
+  const temSinal = typeof window !== 'undefined' && temSinalSessao();
 
   useEffect(() => {
-    if (!lerToken()) {
+    if (!temSinalSessao()) {
       router.replace('/login');
     }
   }, [router]);
 
   useEffect(() => {
     if (isError) {
-      limparToken();
-      router.replace('/login');
+      void limparToken().finally(() => {
+        router.replace('/login');
+      });
     }
   }, [isError, router]);
 
-  if (!lerToken() || isLoading || (!isSuccess && !isError)) {
+  if (!temSinal || isLoading || (!isSuccess && !isError)) {
     return (
       <div className="flex min-h-screen items-center justify-center p-6">
         <div className="grid w-full max-w-md gap-3">

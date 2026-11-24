@@ -3,7 +3,7 @@ import { limparToken } from './auth-token';
 let redirecionandoSessao = false;
 
 /**
- * Encerra a sessão no browser quando a API responde 401/403.
+ * Encerra a sessão no browser quando a API/BFF responde 401/403.
  * Evita loops se várias requests falharem ao mesmo tempo.
  */
 export function encerrarSessaoPorStatus(status: number, mensagem?: string) {
@@ -12,10 +12,9 @@ export function encerrarSessaoPorStatus(status: number, mensagem?: string) {
   if (redirecionandoSessao) return;
 
   redirecionandoSessao = true;
-  limparToken();
+  void limparToken();
 
   try {
-    // import dinâmico evita acoplar sonner no bundle de server
     void import('sonner').then(({ toast }) => {
       toast.error(
         mensagem && mensagem.trim()

@@ -7,12 +7,13 @@ import {
 describe('encerrarSessaoPorStatus', () => {
   afterEach(() => {
     _resetEncerrarSessaoFlag();
-    localStorage.clear();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('ignora status que não são 401/403', () => {
-    localStorage.setItem('copix_token', 'abc');
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
     const assign = vi.fn();
     vi.stubGlobal('location', {
       pathname: '/dashboard',
@@ -20,12 +21,13 @@ describe('encerrarSessaoPorStatus', () => {
     });
 
     encerrarSessaoPorStatus(500);
-    expect(localStorage.getItem('copix_token')).toBe('abc');
+    expect(fetchMock).not.toHaveBeenCalled();
     expect(assign).not.toHaveBeenCalled();
   });
 
-  it('limpa token e redireciona em 401', () => {
-    localStorage.setItem('copix_token', 'abc');
+  it('chama logout do BFF e redireciona em 401', () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal('fetch', fetchMock);
     const assign = vi.fn();
     vi.stubGlobal('location', {
       pathname: '/dashboard',
@@ -33,7 +35,10 @@ describe('encerrarSessaoPorStatus', () => {
     });
 
     encerrarSessaoPorStatus(401, 'Sessão inválida');
-    expect(localStorage.getItem('copix_token')).toBeNull();
+    expect(fetchMock).toHaveBeenCalledWith('/api/auth/sair', {
+      method: 'POST',
+      credentials: 'same-origin',
+    });
     expect(assign).toHaveBeenCalledWith('/login');
   });
 });

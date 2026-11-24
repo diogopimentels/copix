@@ -1,33 +1,40 @@
-import { lerToken } from './auth-token';
 import { ErroApi, extrairMensagemErro } from './erros';
 import { encerrarSessaoPorStatus } from './sessao';
 
-const URL_API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333';
+/** Browser fala só com o BFF Next; o Nest fica atrás do servidor. */
+const URL_BFF = '/api/bff';
 
 export type OpcoesRequisicao = Omit<RequestInit, 'body'> & {
   body?: unknown;
   /** Quando true, não dispara logout automático em 401/403 (ex.: /auth/entrar). */
   ignorarSessaoExpirada?: boolean;
+  /**
+   * Base absoluta ou relativa. Auth BFF usa `/api/auth/...`;
+   * demais chamadas usam `/api/bff`.
+   */
+  baseUrl?: string;
 };
 
 export async function requisitarApi<T>(
   caminho: string,
   opcoes: OpcoesRequisicao = {},
 ): Promise<T> {
-  const { ignorarSessaoExpirada, body, headers: headersOpcao, ...rest } = opcoes;
-  const token = lerToken();
+  const {
+    ignorarSessaoExpirada,
+    body,
+    headers: headersOpcao,
+    baseUrl = URL_BFF,
+    ...rest
+  } = opcoes;
   const headers = new Headers(headersOpcao);
 
   if (!headers.has('Content-Type') && body !== undefined) {
     headers.set('Content-Type', 'application/json');
   }
 
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-
-  const resposta = await fetch(`${URL_API}${caminho}`, {
+  const resposta = await fetch(`${baseUrl}${caminho}`, {
     ...rest,
+    credentials: 'same-origin',
     headers,
     body:
       body === undefined

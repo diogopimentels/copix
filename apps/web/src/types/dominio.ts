@@ -142,7 +142,8 @@ export type RegistroAuditoria = {
 export type RespostaAuth = {
   usuario: Usuario;
   acesso: {
-    token: string;
+    /** Ausente no browser após BFF — JWT fica só no cookie HttpOnly. */
+    token?: string;
     tipo: string;
     expiraEm: string;
   };
