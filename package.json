@@ -1,17 +1,25 @@
 {
-    "name": "Copix",
-    "version": "0.1.0",
-    "private": true,
-    "description": "Plataforma B2B de conciliação financeira para pagamentos Pix",
-    "workspaces": [
-      "apps/*"
-    ],
-    "scripts": {
-      "infra:up": "docker compose up -d",
-      "infra:down": "docker compose down",
-      "infra:logs": "docker compose logs -f"
-    },
-    "engines": {
-      "node": ">=20.0.0"
-    }
+  "name": "copix",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma B2B de conciliação financeira para pagamentos Pix",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f",
+    "api:dev": "npm --workspace=apps/api run start:dev",
+    "api:build": "npm --workspace=apps/api run build",
+    "api:test": "npm --workspace=apps/api run test",
+    "api:seed": "npm --workspace=apps/api run prisma:seed",
+    "api:migrate": "npm --workspace=apps/api run prisma:migrate",
+    "web:dev": "npm --workspace=apps/web run dev",
+    "web:build": "npm --workspace=apps/web run build"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
   }
+}
