@@ -74,7 +74,8 @@ PLAYWRIGHT_SKIP_WEBSERVER=1 npm run web:test:e2e
 
 ## Documentação
 
-- [`docs/ESTADO_ATUAL.md`](docs/ESTADO_ATUAL.md) — foto do MVP backend/front
+- [`docs/ESTADO_COMPLETO.md`](docs/ESTADO_COMPLETO.md) — estado atual detalhado (front + back)
+- [`docs/ESTADO_ATUAL.md`](docs/ESTADO_ATUAL.md) — foto anterior do MVP
 - [`docs/FRONTEND.md`](docs/FRONTEND.md) — arquitetura frontend
 - [`docs/adr/001-auth-token-localstorage.md`](docs/adr/001-auth-token-localstorage.md) — trade-off do JWT
 
