@@ -1,50 +1,55 @@
-# Frontend Copix — fundação
+# Frontend Copix
 
-## Identidade visual (Etapa 1)
+## Identidade
 
-- Light-first, SaaS financeiro.
-- Tipografia: IBM Plex Sans (UI) + Fraunces (marca) + IBM Plex Mono (txid / ids).
-- Accent: teal profundo (`hsl(168 78% 24%)`), sem neon e sem purple.
-- Tokens em CSS variables + Tailwind v4 (`src/app/globals.css`).
+- Light-first, SaaS financeiro
+- Tipografia: IBM Plex Sans + Fraunces (marca) + IBM Plex Mono (ids)
+- Accent teal profundo (`hsl(168 78% 24%)`)
 
-## Stack instalada
+## Rotas
 
-- Next.js 15 / React 19 / TypeScript strict
-- Tailwind CSS v4
-- shadcn-style UI (`components/ui`)
-- TanStack Query
-- Zustand (só org selecionada)
-- React Hook Form + Zod (schemas prontos)
-- Sonner (toasts)
+| Rota | Grupo | Função |
+|---|---|---|
+| `/` | - | redirect → `/login` |
+| `/login` | auth | login |
+| `/registro` | auth | registro |
+| `/dashboard` | dashboard | indicadores + gráfico |
+| `/cobrancas` | dashboard | CRUD leve + simular Pix |
+| `/pagamentos` | dashboard | histórico |
+| `/conciliacoes` | dashboard | pareamento + varredura |
+| `/lancamentos` | dashboard | extrato do razão |
+| `/auditoria` | dashboard | trilha de ações |
+| `/configuracoes` | dashboard | org, provedores, membros |
+| `/painel` | - | redirect legado → `/dashboard` |
 
 ## Estrutura
 
 ```text
-apps/web/src/
-├── app/                 # rotas
-├── components/
-│   ├── ui/              # primitives
-│   └── shared/          # empty/error states
-├── features/            # (próximas etapas)
-├── hooks/
-├── lib/
-│   ├── api/             # cliente + serviços por domínio
-│   ├── utils/
-│   └── validations/
+src/
+├── app/(auth) (dashboard)
+├── components/ui|layout|shared
+├── features/auth|cobrancas|dashboard
+├── hooks/          # TanStack Query por domínio
+├── lib/api|utils|validations
 ├── providers/
-├── stores/
+├── stores/         # org ativa + menu mobile
 └── types/
 ```
 
-## Auth
+## Dados
 
-JWT em `localStorage` por enquanto. Ver `docs/adr/001-auth-token-localstorage.md`.
+- Servidor: TanStack Query (`useCobrancas`, `useDashboard`, …)
+- UI global: Zustand (`organizacaoId`, menu)
+- Forms: React Hook Form + Zod
+- Auth: Bearer + `localStorage` (ADR 001)
 
 ## Scripts
 
 ```bash
 npm run web:dev
-npm run web:build
 npm run web:lint
 npm run web:typecheck
+npm run web:test
+npm run web:test:e2e
+npm run web:build
 ```

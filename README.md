@@ -1,25 +1,47 @@
 # Copix
 
-Conciliação financeira B2B de pagamentos Pix. Monólito modular com API NestJS + frontend Next.js.
+Plataforma B2B de conciliação financeira para pagamentos Pix.
 
-## O que o MVP cobre
+O Copix resolve o caos de casar cobrança emitida × pagamento recebido × lançamento no razão, com trilha de auditoria. No MVP o provedor é um **simulador** assinado por HMAC — não há integração bancária real.
 
-- cadastro/login com JWT
-- organizações multi-tenant
-- cobranças Pix (txid)
-- webhook assinado (HMAC) + simulador de pagamento
-- razão (lançamentos) e conciliação automática
-- painel web pra operar o fluxo
+## Stack
+
+| Camada | Tecnologia |
+|---|---|
+| API | NestJS 11, Prisma 6, PostgreSQL 16, JWT |
+| Web | Next.js 15, React 19, TypeScript strict, Tailwind 4, shadcn-style UI |
+| Dados no client | TanStack Query, Zustand (UI), Zod + React Hook Form |
+| Qualidade | Vitest, Testing Library, Playwright, ESLint, GitHub Actions |
+| Infra local | Docker Compose (Postgres 5433, Redis 6380) |
+
+## Arquitetura
+
+Monorepo npm workspaces (`apps/api`, `apps/web`). Monólito modular no backend; App Router no frontend com layouts `(auth)` e `(dashboard)`.
+
+Fluxo principal:
+
+```text
+Login → Organização → Cobrança (txid)
+  → Simular Pix / Webhook HMAC
+  → Pagamento + crédito no razão + conciliação
+```
+
+## Funcionalidades
+
+- Auth (login/registro) com JWT
+- Multi-tenant por organização
+- Cobranças Pix, pagamentos, conciliação (ok / pendente / divergente)
+- Razão (lançamentos) e auditoria
+- Configurações: org, provedores simulador, membros (leitura)
+- Painel com indicadores e gráfico a partir de dados reais da API
 
 ## Subir local
 
-Precisa de Node 20+, Docker e npm 10+ (o npm 9 do sistema quebra o install dos workspaces).
+Node 20+, Docker, npm 10+.
 
 ```bash
 cp .env.example .env
 docker compose up -d
-
-# se o npm local for antigo:
 npx npm@10 install
 
 cd apps/api
@@ -29,33 +51,36 @@ npx tsx prisma/seed.ts
 cd ../..
 
 npm run api:dev
-# noutro terminal
+# outro terminal
 npm run web:dev
 ```
 
 - API: http://localhost:3333
 - Web: http://localhost:3001
-- Login demo: `demo@copix.local` / `senha123`
+- Demo: `demo@copix.local` / `senha123`
 
-Postgres sobe na porta **5433** e Redis na **6380** pra não bater com outros containers da máquina.
-
-## Fluxo rápido
-
-1. entra no painel com o usuário demo
-2. cria uma cobrança
-3. clica em **Simular Pix**
-4. a cobrança vira `PAGA`, nasce o pagamento, o lançamento de crédito e a conciliação
-
-## Documentação
-
-- Estado do MVP: [`docs/ESTADO_ATUAL.md`](docs/ESTADO_ATUAL.md)
-- Fundação do frontend: [`docs/FRONTEND.md`](docs/FRONTEND.md)
-
-## Qualidade do web
+## Qualidade
 
 ```bash
 npm run web:lint
 npm run web:typecheck
+npm run web:test
 npm run web:build
+
+# E2E (API + web no ar)
+npx playwright install chromium
+PLAYWRIGHT_SKIP_WEBSERVER=1 npm run web:test:e2e
 ```
 
+## Documentação
+
+- [`docs/ESTADO_ATUAL.md`](docs/ESTADO_ATUAL.md) — foto do MVP backend/front
+- [`docs/FRONTEND.md`](docs/FRONTEND.md) — arquitetura frontend
+- [`docs/adr/001-auth-token-localstorage.md`](docs/adr/001-auth-token-localstorage.md) — trade-off do JWT
+
+## Observações honestas
+
+- Provedor Pix atual = simulador
+- JWT ainda em `localStorage` (ADR; BFF+cookie planejado)
+- Listagens filtram/paginam no client; API ainda não tem query params
+- Convite de membros não existe na API
