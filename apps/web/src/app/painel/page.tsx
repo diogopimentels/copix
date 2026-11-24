@@ -1,20 +1,29 @@
 'use client';
 
-import {
-  FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-  type CSSProperties,
-} from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  chamarApi,
-  formatarData,
-  formatarMoeda,
+  authServico,
+  cobrancasServico,
+  conciliacoesServico,
+  lancamentosServico,
   limparToken,
   lerToken,
+  organizacoesServico,
+  pagamentosServico,
+  simuladorServico,
 } from '@/lib/api';
+import {
+  formatarData,
+  formatarMoeda,
+  parsearValorBRL,
+} from '@/lib/utils/formatadores';
 import type {
   Cobranca,
   Conciliacao,
@@ -23,7 +32,7 @@ import type {
   PainelConciliacao,
   ResumoLancamentos,
   Usuario,
-} from '@/lib/tipos';
+} from '@/types/dominio';
 
 export default function PaginaPainel() {
   const router = useRouter();
@@ -36,7 +45,6 @@ export default function PaginaPainel() {
   const [painel, setPainel] = useState<PainelConciliacao | null>(null);
   const [resumo, setResumo] = useState<ResumoLancamentos | null>(null);
   const [erro, setErro] = useState('');
-  const [aviso, setAviso] = useState('');
   const [carregando, setCarregando] = useState(true);
 
   const [novaOrgNome, setNovaOrgNome] = useState('');
@@ -47,11 +55,11 @@ export default function PaginaPainel() {
   const carregarDados = useCallback(async (id: string) => {
     const [listaCobrancas, listaPagamentos, listaConciliacoes, painelAtual, resumoAtual] =
       await Promise.all([
-        chamarApi<Cobranca[]>(`/organizacoes/${id}/cobrancas`),
-        chamarApi<Pagamento[]>(`/organizacoes/${id}/pagamentos`),
-        chamarApi<Conciliacao[]>(`/organizacoes/${id}/conciliacoes`),
-        chamarApi<PainelConciliacao>(`/organizacoes/${id}/conciliacoes/painel`),
-        chamarApi<ResumoLancamentos>(`/organizacoes/${id}/lancamentos/resumo`),
+        cobrancasServico.listar(id),
+        pagamentosServico.listar(id),
+        conciliacoesServico.listar(id),
+        conciliacoesServico.painel(id),
+        lancamentosServico.resumo(id),
       ]);
 
     setCobrancas(listaCobrancas);
@@ -69,10 +77,10 @@ export default function PaginaPainel() {
 
     async function iniciar() {
       try {
-        const perfil = await chamarApi<Usuario>('/auth/eu');
+        const perfil = await authServico.eu();
         setUsuario(perfil);
 
-        const lista = await chamarApi<Organizacao[]>('/organizacoes');
+        const lista = await organizacoesServico.listar();
         setOrganizacoes(lista);
 
         const primeira = lista[0];
@@ -106,17 +114,14 @@ export default function PaginaPainel() {
     evento.preventDefault();
     setErro('');
     try {
-      const org = await chamarApi<Organizacao>('/organizacoes', {
-        method: 'POST',
-        body: JSON.stringify({
-          nome: novaOrgNome,
-          documento: novaOrgDoc.replace(/\D/g, ''),
-        }),
+      const org = await organizacoesServico.criar({
+        nome: novaOrgNome,
+        documento: novaOrgDoc.replace(/\D/g, ''),
       });
       setNovaOrgNome('');
       setNovaOrgDoc('');
-      setAviso('Organização criada');
-      const lista = await chamarApi<Organizacao[]>('/organizacoes');
+      toast.success('Organização criada');
+      const lista = await organizacoesServico.listar();
       setOrganizacoes(lista);
       await trocarOrganizacao(org.id);
     } catch (e) {
@@ -129,20 +134,14 @@ export default function PaginaPainel() {
     if (!organizacaoId) return;
     setErro('');
 
-    const valorCentavos = Math.round(
-      Number(novaCobrancaValor.replace(/\./g, '').replace(',', '.')) * 100,
-    );
-
     try {
-      await chamarApi(`/organizacoes/${organizacaoId}/cobrancas`, {
-        method: 'POST',
-        body: JSON.stringify({
-          descricao: novaCobrancaDesc,
-          valorCentavos,
-        }),
+      const valorCentavos = parsearValorBRL(novaCobrancaValor);
+      await cobrancasServico.criar(organizacaoId, {
+        descricao: novaCobrancaDesc,
+        valorCentavos,
       });
       setNovaCobrancaDesc('');
-      setAviso('Cobrança criada');
+      toast.success('Cobrança criada');
       await carregarDados(organizacaoId);
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao criar cobrança');
@@ -153,11 +152,8 @@ export default function PaginaPainel() {
     if (!organizacaoId) return;
     setErro('');
     try {
-      await chamarApi(`/organizacoes/${organizacaoId}/simulador/pagar`, {
-        method: 'POST',
-        body: JSON.stringify({ cobrancaId }),
-      });
-      setAviso('Pagamento simulado e conciliado');
+      await simuladorServico.pagar(organizacaoId, { cobrancaId });
+      toast.success('Pagamento simulado e conciliado');
       await carregarDados(organizacaoId);
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro ao simular pagamento');
@@ -167,10 +163,8 @@ export default function PaginaPainel() {
   async function executarConciliacao() {
     if (!organizacaoId) return;
     try {
-      await chamarApi(`/organizacoes/${organizacaoId}/conciliacoes/executar`, {
-        method: 'POST',
-      });
-      setAviso('Varredura de conciliação concluída');
+      await conciliacoesServico.executar(organizacaoId);
+      toast.success('Varredura de conciliação concluída');
       await carregarDados(organizacaoId);
     } catch (e) {
       setErro(e instanceof Error ? e.message : 'Erro na varredura');
@@ -184,259 +178,272 @@ export default function PaginaPainel() {
 
   if (carregando) {
     return (
-      <main className="container" style={{ padding: '3rem 0' }}>
-        <p>Carregando painel...</p>
+      <main className="mx-auto grid w-full max-w-6xl gap-4 px-4 py-8">
+        <Skeleton className="h-10 w-48" />
+        <div className="grid gap-4 md:grid-cols-3">
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+        </div>
+        <Skeleton className="h-64" />
       </main>
     );
   }
 
   return (
-    <main className="container" style={{ padding: '2rem 0 4rem', display: 'grid', gap: '1.25rem' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center' }}>
+    <main className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-8">
+      <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="marca" style={{ margin: 0, fontSize: '1.8rem' }}>
+          <p className="font-display text-3xl font-semibold tracking-tight">
             Copix
           </p>
-          <p style={{ margin: '0.25rem 0 0', color: 'var(--texto-suave)' }}>
-            Olá, {usuario?.nome}
-          </p>
+          <p className="text-sm text-muted-foreground">Olá, {usuario?.nome}</p>
         </div>
-        <button className="botao secundario" type="button" onClick={sair}>
+        <Button type="button" variant="outline" onClick={sair}>
           Sair
-        </button>
+        </Button>
       </header>
 
-      {(erro || aviso) && (
-        <p className={erro ? 'erro-texto' : undefined} style={{ color: erro ? undefined : 'var(--ok)' }}>
-          {erro || aviso}
+      {erro ? (
+        <p className="text-sm text-destructive" role="alert">
+          {erro}
         </p>
-      )}
+      ) : null}
 
-      <section className="painel grade dois">
-        <div>
-          <h2 style={{ marginTop: 0 }}>Organização</h2>
-          <select
-            value={organizacaoId}
-            onChange={(e) => void trocarOrganizacao(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.7rem',
-              borderRadius: 10,
-              border: '1px solid var(--borda)',
-              background: 'var(--fundo)',
-              color: 'var(--texto)',
-            }}
-          >
-            {organizacoes.length === 0 && <option value="">Nenhuma ainda</option>}
-            {organizacoes.map((org) => (
-              <option key={org.id} value={org.id}>
-                {org.nome}
-              </option>
-            ))}
-          </select>
-        </div>
+      <section className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Organização</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <select
+              value={organizacaoId}
+              onChange={(e) => void trocarOrganizacao(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-card px-3 text-sm"
+            >
+              {organizacoes.length === 0 ? (
+                <option value="">Nenhuma ainda</option>
+              ) : null}
+              {organizacoes.map((org) => (
+                <option key={org.id} value={org.id}>
+                  {org.nome}
+                </option>
+              ))}
+            </select>
+          </CardContent>
+        </Card>
 
-        <form onSubmit={criarOrganizacao} className="grade" style={{ gap: '0.7rem' }}>
-          <h2 style={{ margin: 0 }}>Nova organização</h2>
-          <input
-            placeholder="Nome"
-            value={novaOrgNome}
-            onChange={(e) => setNovaOrgNome(e.target.value)}
-            required
-            style={estiloInput}
-          />
-          <input
-            placeholder="CNPJ (só números)"
-            value={novaOrgDoc}
-            onChange={(e) => setNovaOrgDoc(e.target.value)}
-            required
-            style={estiloInput}
-          />
-          <button className="botao" type="submit">
-            Criar
-          </button>
-        </form>
+        <Card>
+          <CardHeader>
+            <CardTitle>Nova organização</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={criarOrganizacao} className="grid gap-3">
+              <Input
+                placeholder="Nome"
+                value={novaOrgNome}
+                onChange={(e) => setNovaOrgNome(e.target.value)}
+                required
+              />
+              <Input
+                placeholder="CNPJ (só números)"
+                value={novaOrgDoc}
+                onChange={(e) => setNovaOrgDoc(e.target.value)}
+                required
+              />
+              <Button type="submit">Criar</Button>
+            </form>
+          </CardContent>
+        </Card>
       </section>
 
-      {organizacaoId && (
+      {organizacaoId ? (
         <>
-          <section className="grade tres">
-            <article className="painel">
-              <p style={{ color: 'var(--texto-suave)', margin: 0 }}>Saldo no razão</p>
-              <p className="marca" style={{ fontSize: '1.6rem', margin: '0.4rem 0 0' }}>
-                {formatarMoeda(resumo?.saldoCentavos ?? 0)}
-              </p>
-            </article>
-            <article className="painel">
-              <p style={{ color: 'var(--texto-suave)', margin: 0 }}>Conciliadas</p>
-              <p className="marca" style={{ fontSize: '1.6rem', margin: '0.4rem 0 0' }}>
-                {painel?.conciliadas ?? 0}
-              </p>
-            </article>
-            <article className="painel">
-              <p style={{ color: 'var(--texto-suave)', margin: 0 }}>Divergentes</p>
-              <p className="marca" style={{ fontSize: '1.6rem', margin: '0.4rem 0 0' }}>
-                {painel?.divergentes ?? 0}
-              </p>
-            </article>
+          <section className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <p className="text-sm text-muted-foreground">Saldo no razão</p>
+                <CardTitle className="text-2xl">
+                  {formatarMoeda(resumo?.saldoCentavos ?? 0)}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <p className="text-sm text-muted-foreground">Conciliadas</p>
+                <CardTitle className="text-2xl">
+                  {painel?.conciliadas ?? 0}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <p className="text-sm text-muted-foreground">Divergentes</p>
+                <CardTitle className="text-2xl">
+                  {painel?.divergentes ?? 0}
+                </CardTitle>
+              </CardHeader>
+            </Card>
           </section>
 
-          <section className="painel">
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center' }}>
-              <h2 style={{ margin: 0 }}>Cobranças</h2>
-              <button className="botao secundario" type="button" onClick={() => void executarConciliacao()}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
+              <CardTitle>Cobranças</CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void executarConciliacao()}
+              >
                 Rodar conciliação
-              </button>
-            </div>
-
-            <form
-              onSubmit={criarCobranca}
-              className="grade dois"
-              style={{ marginTop: '1rem', marginBottom: '1rem' }}
-            >
-              <input
-                placeholder="Descrição"
-                value={novaCobrancaDesc}
-                onChange={(e) => setNovaCobrancaDesc(e.target.value)}
-                required
-                style={estiloInput}
-              />
-              <div style={{ display: 'flex', gap: '0.6rem' }}>
-                <input
+              </Button>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <form
+                onSubmit={criarCobranca}
+                className="grid gap-3 md:grid-cols-[1fr_160px_auto]"
+              >
+                <Input
+                  placeholder="Descrição"
+                  value={novaCobrancaDesc}
+                  onChange={(e) => setNovaCobrancaDesc(e.target.value)}
+                  required
+                />
+                <Input
                   placeholder="Valor (ex: 29,90)"
                   value={novaCobrancaValor}
                   onChange={(e) => setNovaCobrancaValor(e.target.value)}
                   required
-                  style={estiloInput}
                 />
-                <button className="botao" type="submit">
-                  Criar
-                </button>
+                <Button type="submit">Criar</Button>
+              </form>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-left text-muted-foreground">
+                      <th className="py-2 font-medium">Descrição</th>
+                      <th className="py-2 font-medium">Valor</th>
+                      <th className="py-2 font-medium">Status</th>
+                      <th className="py-2 font-medium">Txid</th>
+                      <th className="py-2 font-medium" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cobrancas.map((cobranca) => (
+                      <tr key={cobranca.id} className="border-b border-border/70">
+                        <td className="py-3">{cobranca.descricao}</td>
+                        <td className="py-3">
+                          {formatarMoeda(cobranca.valorCentavos)}
+                        </td>
+                        <td className="py-3">
+                          <Badge
+                            variant={
+                              cobranca.status === 'PAGA'
+                                ? 'sucesso'
+                                : cobranca.status === 'PENDENTE'
+                                  ? 'alerta'
+                                  : 'erro'
+                            }
+                          >
+                            {cobranca.status}
+                          </Badge>
+                        </td>
+                        <td className="py-3 font-mono text-xs">{cobranca.txid}</td>
+                        <td className="py-3 text-right">
+                          {cobranca.status === 'PENDENTE' ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => void simularPagamento(cobranca.id)}
+                            >
+                              Simular Pix
+                            </Button>
+                          ) : null}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </form>
+            </CardContent>
+          </Card>
 
-            <table className="tabela">
-              <thead>
-                <tr>
-                  <th>Descrição</th>
-                  <th>Valor</th>
-                  <th>Status</th>
-                  <th>Txid</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {cobrancas.map((cobranca) => (
-                  <tr key={cobranca.id}>
-                    <td>{cobranca.descricao}</td>
-                    <td>{formatarMoeda(cobranca.valorCentavos)}</td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          cobranca.status === 'PAGA'
-                            ? 'ok'
-                            : cobranca.status === 'PENDENTE'
-                              ? 'alerta'
-                              : 'erro'
-                        }`}
-                      >
-                        {cobranca.status}
-                      </span>
-                    </td>
-                    <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                      {cobranca.txid}
-                    </td>
-                    <td>
-                      {cobranca.status === 'PENDENTE' && (
-                        <button
-                          className="botao"
-                          type="button"
-                          onClick={() => void simularPagamento(cobranca.id)}
+          <Card>
+            <CardHeader>
+              <CardTitle>Pagamentos recebidos</CardTitle>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="py-2 font-medium">End-to-end</th>
+                    <th className="py-2 font-medium">Valor</th>
+                    <th className="py-2 font-medium">Recebido em</th>
+                    <th className="py-2 font-medium">Provedor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagamentos.map((pagamento) => (
+                    <tr key={pagamento.id} className="border-b border-border/70">
+                      <td className="py-3 font-mono text-xs">
+                        {pagamento.endToEndId}
+                      </td>
+                      <td className="py-3">
+                        {formatarMoeda(pagamento.valorCentavos)}
+                      </td>
+                      <td className="py-3">{formatarData(pagamento.recebidoEm)}</td>
+                      <td className="py-3">{pagamento.provedor?.nome ?? '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Conciliações</CardTitle>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="py-2 font-medium">Status</th>
+                    <th className="py-2 font-medium">Cobrança</th>
+                    <th className="py-2 font-medium">Pagamento</th>
+                    <th className="py-2 font-medium">Obs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {conciliacoes.map((item) => (
+                    <tr key={item.id} className="border-b border-border/70">
+                      <td className="py-3">
+                        <Badge
+                          variant={
+                            item.status === 'CONCILIADO'
+                              ? 'sucesso'
+                              : item.status === 'DIVERGENTE'
+                                ? 'erro'
+                                : 'alerta'
+                          }
                         >
-                          Simular Pix
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-
-          <section className="painel">
-            <h2 style={{ marginTop: 0 }}>Pagamentos recebidos</h2>
-            <table className="tabela">
-              <thead>
-                <tr>
-                  <th>End-to-end</th>
-                  <th>Valor</th>
-                  <th>Recebido em</th>
-                  <th>Provedor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pagamentos.map((pagamento) => (
-                  <tr key={pagamento.id}>
-                    <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                      {pagamento.endToEndId}
-                    </td>
-                    <td>{formatarMoeda(pagamento.valorCentavos)}</td>
-                    <td>{formatarData(pagamento.recebidoEm)}</td>
-                    <td>{pagamento.provedor?.nome ?? '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-
-          <section className="painel">
-            <h2 style={{ marginTop: 0 }}>Conciliações</h2>
-            <table className="tabela">
-              <thead>
-                <tr>
-                  <th>Status</th>
-                  <th>Cobrança</th>
-                  <th>Pagamento</th>
-                  <th>Obs</th>
-                </tr>
-              </thead>
-              <tbody>
-                {conciliacoes.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <span
-                        className={`badge ${
-                          item.status === 'CONCILIADO'
-                            ? 'ok'
-                            : item.status === 'DIVERGENTE'
-                              ? 'erro'
-                              : 'alerta'
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                    <td>{item.cobranca?.descricao ?? '-'}</td>
-                    <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                      {item.pagamento?.endToEndId ?? '-'}
-                    </td>
-                    <td>{item.motivoDivergencia ?? '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
+                          {item.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3">{item.cobranca?.descricao ?? '-'}</td>
+                      <td className="py-3 font-mono text-xs">
+                        {item.pagamento?.endToEndId ?? '-'}
+                      </td>
+                      <td className="py-3">{item.motivoDivergencia ?? '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
         </>
-      )}
+      ) : null}
     </main>
   );
 }
-
-const estiloInput: CSSProperties = {
-  width: '100%',
-  border: '1px solid var(--borda)',
-  borderRadius: 10,
-  padding: '0.7rem 0.9rem',
-  background: 'var(--fundo)',
-  color: 'var(--texto)',
-};

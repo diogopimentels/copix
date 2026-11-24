@@ -48,4 +48,14 @@ Postgres sobe na porta **5433** e Redis na **6380** pra não bater com outros co
 
 ## Documentação
 
-Estado completo do projeto agora: [`docs/ESTADO_ATUAL.md`](docs/ESTADO_ATUAL.md)
+- Estado do MVP: [`docs/ESTADO_ATUAL.md`](docs/ESTADO_ATUAL.md)
+- Fundação do frontend: [`docs/FRONTEND.md`](docs/FRONTEND.md)
+
+## Qualidade do web
+
+```bash
+npm run web:lint
+npm run web:typecheck
+npm run web:build
+```
+

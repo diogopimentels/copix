@@ -1,0 +1,25 @@
+'use client';
+
+import { Toaster } from 'sonner';
+import type { ReactNode } from 'react';
+import { QueryProvider } from './query-provider';
+
+type Props = {
+  children: ReactNode;
+};
+
+export function AppProviders({ children }: Props) {
+  return (
+    <QueryProvider>
+      {children}
+      <Toaster
+        position="top-right"
+        richColors
+        closeButton
+        toastOptions={{
+          className: 'font-sans',
+        }}
+      />
+    </QueryProvider>
+  );
+}

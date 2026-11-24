@@ -1,0 +1,12 @@
+export { requisitarApi } from './cliente';
+export { salvarToken, lerToken, limparToken } from './auth-token';
+export { ErroApi } from './erros';
+export { authServico } from './servicos/auth';
+export { organizacoesServico } from './servicos/organizacoes';
+export { cobrancasServico } from './servicos/cobrancas';
+export { pagamentosServico } from './servicos/pagamentos';
+export { conciliacoesServico } from './servicos/conciliacoes';
+export { lancamentosServico } from './servicos/lancamentos';
+export { auditoriaServico } from './servicos/auditoria';
+export { provedoresServico } from './servicos/provedores';
+export { simuladorServico } from './servicos/simulador';

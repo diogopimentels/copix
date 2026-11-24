@@ -1,14 +1,14 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { chamarApi, lerToken, salvarToken } from '@/lib/api';
-import type { Usuario } from '@/lib/tipos';
-
-type RespostaAuth = {
-  usuario: Usuario;
-  acesso: { token: string };
-};
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { authServico, lerToken, salvarToken } from '@/lib/api';
 
 export default function PaginaLogin() {
   const router = useRouter();
@@ -31,105 +31,115 @@ export default function PaginaLogin() {
     setCarregando(true);
 
     try {
-      const caminho = modo === 'entrar' ? '/auth/entrar' : '/auth/registrar';
-      const corpo =
+      const resposta =
         modo === 'entrar'
-          ? { email, senha }
-          : { nome, email, senha };
-
-      const resposta = await chamarApi<RespostaAuth>(caminho, {
-        method: 'POST',
-        body: JSON.stringify(corpo),
-      });
+          ? await authServico.entrar({ email, senha })
+          : await authServico.registrar({ nome, email, senha });
 
       salvarToken(resposta.acesso.token);
+      toast.success(modo === 'entrar' ? 'Login feito' : 'Conta criada');
       router.push('/painel');
     } catch (e) {
-      setErro(e instanceof Error ? e.message : 'Não foi possível autenticar');
+      const mensagem =
+        e instanceof Error ? e.message : 'Não foi possível autenticar';
+      setErro(mensagem);
     } finally {
       setCarregando(false);
     }
   }
 
   return (
-    <main className="container" style={{ padding: '4rem 0' }}>
-      <section
-        className="painel"
-        style={{
-          maxWidth: 460,
-          margin: '0 auto',
-          display: 'grid',
-          gap: '1.25rem',
-        }}
-      >
-        <div>
-          <p className="marca" style={{ fontSize: '2rem', margin: 0 }}>
+    <main className="mx-auto flex min-h-screen w-full max-w-md items-center px-4 py-10">
+      <Card className="w-full">
+        <CardHeader>
+          <p className="font-display text-3xl font-semibold tracking-tight text-foreground">
             Copix
           </p>
-          <p style={{ color: 'var(--texto-suave)', margin: '0.4rem 0 0' }}>
-            Conciliação Pix sem planilha improvisada.
-          </p>
-        </div>
+          <CardTitle className="sr-only">
+            {modo === 'entrar' ? 'Entrar' : 'Criar conta'}
+          </CardTitle>
+          <CardDescription>
+            Conciliação Pix com trilha clara de cobrança, pagamento e razão.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={enviar} className="grid gap-4">
+            {modo === 'registrar' ? (
+              <div className="grid gap-2">
+                <Label htmlFor="nome">Nome</Label>
+                <Input
+                  id="nome"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  required
+                  autoComplete="name"
+                />
+              </div>
+            ) : null}
 
-        <form onSubmit={enviar} style={{ display: 'grid', gap: '0.9rem' }}>
-          {modo === 'registrar' && (
-            <div className="campo">
-              <label htmlFor="nome">Nome</label>
-              <input
-                id="nome"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
+            <div className="grid gap-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
               />
             </div>
-          )}
 
-          <div className="campo">
-            <label htmlFor="email">E-mail</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+            <div className="grid gap-2">
+              <Label htmlFor="senha">Senha</Label>
+              <Input
+                id="senha"
+                type="password"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                required
+                minLength={6}
+                autoComplete={
+                  modo === 'entrar' ? 'current-password' : 'new-password'
+                }
+              />
+            </div>
 
-          <div className="campo">
-            <label htmlFor="senha">Senha</label>
-            <input
-              id="senha"
-              type="password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              required
-              minLength={6}
-            />
-          </div>
+            {erro ? (
+              <p className="text-sm text-destructive" role="alert">
+                {erro}
+              </p>
+            ) : null}
 
-          {erro && <p className="erro-texto">{erro}</p>}
+            <Button type="submit" disabled={carregando} className="w-full">
+              {carregando
+                ? 'Aguarde...'
+                : modo === 'entrar'
+                  ? 'Entrar'
+                  : 'Criar conta'}
+            </Button>
+          </form>
 
-          <button className="botao" type="submit" disabled={carregando}>
-            {carregando
-              ? 'Aguarde...'
-              : modo === 'entrar'
-                ? 'Entrar'
-                : 'Criar conta'}
-          </button>
-        </form>
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-3 w-full"
+            onClick={() =>
+              setModo((atual) => (atual === 'entrar' ? 'registrar' : 'entrar'))
+            }
+          >
+            {modo === 'entrar'
+              ? 'Não tem conta? Registrar'
+              : 'Já tem conta? Entrar'}
+          </Button>
 
-        <button
-          type="button"
-          className="botao secundario"
-          onClick={() =>
-            setModo((atual) => (atual === 'entrar' ? 'registrar' : 'entrar'))
-          }
-        >
-          {modo === 'entrar'
-            ? 'Não tem conta? Registrar'
-            : 'Já tem conta? Entrar'}
-        </button>
-      </section>
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Demo: demo@copix.local / senha123 ·{' '}
+            <Link href="/painel" className="underline-offset-2 hover:underline">
+              painel
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </main>
   );
 }
