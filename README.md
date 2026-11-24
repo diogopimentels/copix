@@ -45,3 +45,7 @@ Postgres sobe na porta **5433** e Redis na **6380** pra não bater com outros co
 2. cria uma cobrança
 3. clica em **Simular Pix**
 4. a cobrança vira `PAGA`, nasce o pagamento, o lançamento de crédito e a conciliação
+
+## Documentação
+
+Estado completo do projeto agora: [`docs/ESTADO_ATUAL.md`](docs/ESTADO_ATUAL.md)
