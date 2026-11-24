@@ -34,7 +34,7 @@ npm run web:dev
 ```
 
 - API: http://localhost:3333
-- Web: http://localhost:3000
+- Web: http://localhost:3001
 - Login demo: `demo@copix.local` / `senha123`
 
 Postgres sobe na porta **5433** e Redis na **6380** pra não bater com outros containers da máquina.
