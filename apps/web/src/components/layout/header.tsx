@@ -2,6 +2,7 @@
 
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { NativeSelect } from '@/components/ui/native-select';
 import { usePerfil, useSair } from '@/hooks/use-auth';
 import { useOrganizacaoAtiva } from '@/hooks/use-organizacao-ativa';
 import { useUiStore } from '@/stores/ui-store';
@@ -18,7 +19,7 @@ export function Header() {
   } = useOrganizacaoAtiva();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur md:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-card/90 px-4 backdrop-blur md:px-6">
       <Button
         type="button"
         variant="outline"
@@ -26,6 +27,7 @@ export function Header() {
         className="md:hidden"
         onClick={alternarMenu}
         aria-label="Abrir menu"
+        aria-controls="menu-principal"
       >
         <Menu className="size-4" />
       </Button>
@@ -34,9 +36,9 @@ export function Header() {
         <label htmlFor="seletor-org" className="sr-only">
           Organização ativa
         </label>
-        <select
+        <NativeSelect
           id="seletor-org"
-          className="h-10 max-w-full rounded-md border border-input bg-card px-3 text-sm md:max-w-xs"
+          className="max-w-full md:max-w-xs"
           value={organizacaoId ?? ''}
           disabled={isLoading || organizacoes.length === 0}
           onChange={(e) => definirOrganizacaoId(e.target.value)}
@@ -49,13 +51,16 @@ export function Header() {
               {org.nome}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
 
-      <div className="flex items-center gap-2">
-        <p className="hidden text-sm text-muted-foreground sm:block">
-          {perfil?.nome ?? '…'}
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="hidden text-right sm:block">
+          <p className="text-sm font-medium text-foreground">
+            {perfil?.nome ?? '…'}
+          </p>
+          <p className="text-xs text-muted-foreground">{perfil?.email}</p>
+        </div>
         <Button type="button" variant="outline" size="sm" onClick={sair}>
           Sair
         </Button>

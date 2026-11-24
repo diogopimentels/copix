@@ -34,13 +34,14 @@ export function FormularioEntrar() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5" noValidate>
       <div className="grid gap-2">
         <Label htmlFor="email">E-mail</Label>
         <Input
           id="email"
           type="email"
           autoComplete="email"
+          placeholder="voce@empresa.com"
           {...register('email')}
         />
         {errors.email ? (
@@ -61,20 +62,22 @@ export function FormularioEntrar() {
         ) : null}
       </div>
 
-      <Button type="submit" disabled={entrar.isPending}>
+      <Button type="submit" className="w-full" disabled={entrar.isPending}>
         {entrar.isPending ? 'Entrando...' : 'Entrar'}
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Não tem conta?{' '}
-        <Link href="/registro" className="font-medium text-primary hover:underline">
+        <Link href="/registro" className="font-medium text-foreground underline-offset-4 hover:underline">
           Registrar
         </Link>
       </p>
 
-      <p className="text-center text-xs text-muted-foreground">
-        Demo: demo@copix.local / senha123
-      </p>
+      <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
+        Ambiente demo:{' '}
+        <span className="font-mono text-foreground">demo@copix.local</span> /{' '}
+        <span className="font-mono text-foreground">senha123</span>
+      </div>
     </form>
   );
 }

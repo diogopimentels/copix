@@ -1,48 +1,54 @@
 @import "tailwindcss";
 
-/* Tokens Copix — SaaS financeiro, light-first, teal profundo */
+/*
+  Copix design tokens — fintech B2B light
+  Grafite + slate + teal de propósito (não decorativo)
+*/
 :root {
-  --radius: 0.625rem;
+  --radius: 0.5rem;
 
-  --background: 150 14% 97%;
-  --foreground: 158 33% 11%;
+  --background: 210 40% 98%; /* #F8FAFC */
+  --foreground: 222 47% 11%; /* #0F172A */
 
   --card: 0 0% 100%;
-  --card-foreground: 158 33% 11%;
+  --card-foreground: 222 47% 11%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 158 33% 11%;
+  --popover-foreground: 222 47% 11%;
 
-  --primary: 168 78% 24%;
-  --primary-foreground: 150 40% 98%;
+  --primary: 175 84% 26%; /* #0F766E */
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 150 12% 93%;
-  --secondary-foreground: 158 28% 18%;
+  --secondary: 210 40% 96%; /* #F1F5F9 */
+  --secondary-foreground: 222 47% 11%;
 
-  --muted: 150 12% 93%;
-  --muted-foreground: 158 10% 40%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%; /* #64748B */
 
-  --accent: 168 30% 94%;
-  --accent-foreground: 168 78% 20%;
+  --accent: 175 40% 95%;
+  --accent-foreground: 175 84% 22%;
 
-  --destructive: 4 72% 40%;
+  --destructive: 0 72% 45%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 150 12% 84%;
-  --input: 150 12% 84%;
-  --ring: 168 78% 24%;
+  --border: 214 32% 91%; /* #E2E8F0 */
+  --input: 214 32% 91%;
+  --ring: 175 84% 26%;
 
-  --sucesso: 152 78% 27%;
-  --alerta: 36 90% 33%;
-  --sidebar: 150 18% 98%;
-  --sidebar-foreground: 158 20% 22%;
-  --sidebar-border: 150 12% 88%;
-  --sidebar-accent: 168 30% 94%;
-  --sidebar-accent-foreground: 168 78% 20%;
+  --sucesso: 160 84% 30%;
+  --alerta: 32 95% 40%;
 
-  --fonte-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
-  --fonte-display: "Fraunces", Georgia, serif;
-  --fonte-mono: "IBM Plex Mono", ui-monospace, monospace;
+  /* Sidebar escura — identidade, não template cinza claro */
+  --sidebar: 222 47% 11%;
+  --sidebar-foreground: 210 40% 96%;
+  --sidebar-muted: 215 20% 65%;
+  --sidebar-border: 217 33% 17%;
+  --sidebar-accent: 217 33% 17%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 175 84% 40%;
+
+  --fonte-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --fonte-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 @theme inline {
@@ -69,18 +75,21 @@
   --color-alerta: hsl(var(--alerta));
   --color-sidebar: hsl(var(--sidebar));
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-muted: hsl(var(--sidebar-muted));
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-accent: hsl(var(--sidebar-accent));
   --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
 
   --font-sans: var(--fonte-sans);
-  --font-display: var(--fonte-display);
   --font-mono: var(--fonte-mono);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: 0.75rem;
+
+  --shadow-xs: 0 1px 2px rgb(15 23 42 / 0.04);
 }
 
 @layer base {
@@ -94,11 +103,12 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     min-height: 100%;
   }
 
   :focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+    @apply outline-none ring-2 ring-ring/40 ring-offset-2 ring-offset-background;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -110,5 +120,11 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+@layer utilities {
+  .texto-financeiro {
+    @apply font-mono tabular-nums tracking-tight;
   }
 }

@@ -3,7 +3,8 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ITENS_NAVEGACAO } from '@/lib/navegacao';
+import { MarcaCopix } from '@/components/shared/marca-copix';
+import { GRUPOS_NAVEGACAO } from '@/lib/navegacao';
 import { cn } from '@/lib/utils';
 import { useUiStore } from '@/stores/ui-store';
 
@@ -36,7 +37,7 @@ export function Sidebar() {
     <>
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-foreground/30 transition-opacity md:hidden',
+          'fixed inset-0 z-40 bg-foreground/40 transition-opacity md:hidden',
           menuAberto ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
         onClick={fecharMenu}
@@ -47,45 +48,47 @@ export function Sidebar() {
         id="menu-principal"
         aria-label="Menu de navegação"
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar transition-transform md:static md:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-[240px] flex-col bg-sidebar text-sidebar-foreground transition-transform md:static md:translate-x-0',
           menuAberto ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="border-b border-sidebar-border px-5 py-5">
-          <Link
-            href="/dashboard"
-            className="font-display text-2xl font-semibold tracking-tight text-sidebar-foreground"
-            onClick={fecharMenu}
-          >
-            Copix
+        <div className="border-b border-sidebar-border px-4 py-4">
+          <Link href="/dashboard" onClick={fecharMenu}>
+            <MarcaCopix tom="escuro" tamanho="md" />
           </Link>
-          <p className="mt-1 text-xs text-muted-foreground">Conciliação Pix</p>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="Principal">
-          {ITENS_NAVEGACAO.map((item) => {
-            const ativo =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
-            const Icone = item.icone;
+        <nav className="flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4" aria-label="Principal">
+          {GRUPOS_NAVEGACAO.map((grupo) => (
+            <div key={grupo.titulo} className="grid gap-1">
+              <p className="px-2.5 pb-1 text-[10px] font-medium tracking-wider text-sidebar-muted uppercase">
+                {grupo.titulo}
+              </p>
+              {grupo.itens.map((item) => {
+                const ativo =
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const Icone = item.icone;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={fecharMenu}
-                className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
-                  ativo
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground',
-                )}
-                aria-current={ativo ? 'page' : undefined}
-              >
-                <Icone className="size-4 shrink-0" aria-hidden />
-                {item.label}
-              </Link>
-            );
-          })}
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={fecharMenu}
+                    className={cn(
+                      'flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-medium transition-colors',
+                      ativo
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-[inset_2px_0_0_0_hsl(var(--sidebar-ring))]'
+                        : 'text-sidebar-muted hover:bg-sidebar-accent/70 hover:text-sidebar-foreground',
+                    )}
+                    aria-current={ativo ? 'page' : undefined}
+                  >
+                    <Icone className="size-4 shrink-0 opacity-80" aria-hidden />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
       </aside>
     </>

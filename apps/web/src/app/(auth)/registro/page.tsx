@@ -1,11 +1,4 @@
 import type { Metadata } from 'next';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { FormularioRegistro } from '@/features/auth/formulario-registro';
 
 export const metadata: Metadata = {
@@ -14,17 +7,15 @@ export const metadata: Metadata = {
 
 export default function PaginaRegistro() {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <p className="font-display text-3xl font-semibold tracking-tight">Copix</p>
-        <CardTitle>Criar conta</CardTitle>
-        <CardDescription>
-          Comece com uma organização e um provedor simulador prontos.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <FormularioRegistro />
-      </CardContent>
-    </Card>
+    <div className="grid gap-8">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-semibold tracking-tight">Criar conta</h1>
+        <p className="text-sm text-muted-foreground">
+          Cadastro individual. Depois você cria ou seleciona a organização no
+          painel.
+        </p>
+      </div>
+      <FormularioRegistro />
+    </div>
   );
 }

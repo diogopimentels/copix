@@ -12,11 +12,11 @@ export function EstadoVazio({ titulo, descricao, acao, className }: Props) {
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center',
+        'flex flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border bg-muted/30 px-6 py-10 text-center',
         className,
       )}
     >
-      <p className="font-medium text-foreground">{titulo}</p>
+      <p className="text-sm font-medium text-foreground">{titulo}</p>
       {descricao ? (
         <p className="max-w-sm text-sm text-muted-foreground">{descricao}</p>
       ) : null}

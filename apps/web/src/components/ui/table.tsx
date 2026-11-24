@@ -21,7 +21,7 @@ function TableRow({ className, ...props }: ComponentProps<'tr'>) {
   return (
     <tr
       className={cn(
-        'border-b border-border/70 transition-colors hover:bg-muted/40',
+        'border-b border-border transition-colors hover:bg-muted/50',
         className,
       )}
       {...props}
@@ -33,7 +33,7 @@ function TableHead({ className, ...props }: ComponentProps<'th'>) {
   return (
     <th
       className={cn(
-        'h-10 px-3 text-left align-middle text-xs font-medium text-muted-foreground',
+        'h-9 px-3 text-left align-middle text-xs font-medium text-muted-foreground',
         className,
       )}
       {...props}
@@ -42,7 +42,7 @@ function TableHead({ className, ...props }: ComponentProps<'th'>) {
 }
 
 function TableCell({ className, ...props }: ComponentProps<'td'>) {
-  return <td className={cn('p-3 align-middle', className)} {...props} />;
+  return <td className={cn('px-3 py-2.5 align-middle', className)} {...props} />;
 }
 
 export { Table, TableHeader, TableBody, TableRow, TableHead, TableCell };

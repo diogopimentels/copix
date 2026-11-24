@@ -35,7 +35,7 @@ export function FormularioRegistro() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5" noValidate>
       <div className="grid gap-2">
         <Label htmlFor="nome">Nome</Label>
         <Input id="nome" autoComplete="name" {...register('nome')} />
@@ -70,13 +70,13 @@ export function FormularioRegistro() {
         ) : null}
       </div>
 
-      <Button type="submit" disabled={registrar.isPending}>
+      <Button type="submit" className="w-full" disabled={registrar.isPending}>
         {registrar.isPending ? 'Criando...' : 'Criar conta'}
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Já tem conta?{' '}
-        <Link href="/login" className="font-medium text-primary hover:underline">
+        <Link href="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
           Entrar
         </Link>
       </p>

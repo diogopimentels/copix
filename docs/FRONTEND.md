@@ -2,9 +2,10 @@
 
 ## Identidade
 
-- Light-first, SaaS financeiro
-- Tipografia: IBM Plex Sans + Fraunces (marca) + IBM Plex Mono (ids)
-- Accent teal profundo (`hsl(168 78% 24%)`)
+- Light content + sidebar grafite (fintech B2B)
+- Tipografia: Inter (UI) + JetBrains Mono (valores/ids)
+- Accent teal (`#0F766E`) com propósito; superfícies sem sombra decorativa
+- Tokens em `app/globals.css`
 
 ## Rotas
 

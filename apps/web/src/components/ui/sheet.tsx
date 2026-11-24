@@ -68,7 +68,7 @@ function SheetTitle({
 }: ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={cn('font-display text-lg font-semibold tracking-tight', className)}
+      className={cn('text-base font-semibold tracking-tight', className)}
       {...props}
     />
   );
