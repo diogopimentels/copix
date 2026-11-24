@@ -13,6 +13,8 @@ build/
 out/
 coverage/
 *.tsbuildinfo
+apps/web/playwright-report/
+apps/web/test-results/
 
 # Logs
 *.log
