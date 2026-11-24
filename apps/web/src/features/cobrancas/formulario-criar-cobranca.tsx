@@ -29,7 +29,7 @@ export function FormularioCriarCobranca({ organizacaoId, onCriado }: Props) {
     resolver: zodResolver(schemaCriarCobranca),
     defaultValues: {
       descricao: '',
-      valor: '29,90',
+      valor: '',
       vencimentoEm: '',
     },
   });
@@ -42,7 +42,7 @@ export function FormularioCriarCobranca({ organizacaoId, onCriado }: Props) {
         vencimentoEm: dados.vencimentoEm || undefined,
       });
       toast.success('Cobrança criada');
-      reset({ descricao: '', valor: '29,90', vencimentoEm: '' });
+      reset({ descricao: '', valor: '', vencimentoEm: '' });
       onCriado?.();
     } catch (erro) {
       toast.error(erro instanceof Error ? erro.message : 'Erro ao criar cobrança');

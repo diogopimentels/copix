@@ -6,6 +6,8 @@ export const authServico = {
     return requisitarApi<RespostaAuth>('/auth/entrar', {
       method: 'POST',
       body: dados,
+      // credenciais inválidas também são 401; não pode matar a tela de login
+      ignorarSessaoExpirada: true,
     });
   },
 
@@ -13,8 +15,10 @@ export const authServico = {
     return requisitarApi<RespostaAuth>('/auth/registrar', {
       method: 'POST',
       body: dados,
+      ignorarSessaoExpirada: true,
     });
   },
+
 
   eu() {
     return requisitarApi<Usuario>('/auth/eu');

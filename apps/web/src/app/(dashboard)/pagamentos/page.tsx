@@ -1,11 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo } from 'react';
 import { PageHeader } from '@/components/shared/page-header';
 import { EstadoErro } from '@/components/shared/estado-erro';
 import { EstadoVazio } from '@/components/shared/estado-vazio';
+import { Paginacao } from '@/components/shared/paginacao';
+import { TabelaResponsiva } from '@/components/shared/tabela-responsiva';
+import { ToolbarFiltros } from '@/components/shared/toolbar-filtros';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,17 +19,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useListaPaginada } from '@/hooks/use-lista-paginada';
 import { useOrganizacaoAtiva } from '@/hooks/use-organizacao-ativa';
 import { usePagamentos } from '@/hooks/use-pagamentos';
+import { useParametroBusca } from '@/hooks/use-parametro-busca';
 import { formatarData, formatarMoeda } from '@/lib/utils/formatadores';
 
 const POR_PAGINA = 10;
 
-export default function PaginaPagamentos() {
+function ConteudoPagamentos() {
   const { organizacaoId } = useOrganizacaoAtiva();
   const { data, isLoading, isError, error, refetch } = usePagamentos(organizacaoId);
-  const [busca, setBusca] = useState('');
-  const [pagina, setPagina] = useState(1);
+  const [busca, setBusca] = useParametroBusca('q');
 
   const filtrados = useMemo(() => {
     const termo = busca.toLowerCase();
@@ -39,12 +42,8 @@ export default function PaginaPagamentos() {
     );
   }, [data, busca]);
 
-  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA));
-  const paginaAtual = Math.min(pagina, totalPaginas);
-  const fatia = filtrados.slice(
-    (paginaAtual - 1) * POR_PAGINA,
-    paginaAtual * POR_PAGINA,
-  );
+  const { fatia, pagina, totalPaginas, totalItens, setPagina, reiniciarPagina } =
+    useListaPaginada(filtrados, POR_PAGINA);
 
   if (!organizacaoId) {
     return (
@@ -65,14 +64,17 @@ export default function PaginaPagamentos() {
       <Card>
         <CardHeader className="gap-3 space-y-0">
           <CardTitle>Recebidos</CardTitle>
-          <Input
-            placeholder="Buscar por end-to-end, txid ou provedor"
-            value={busca}
-            onChange={(e) => {
-              setBusca(e.target.value);
-              setPagina(1);
-            }}
-          />
+          <ToolbarFiltros>
+            <Input
+              placeholder="Buscar por end-to-end, txid ou provedor"
+              value={busca}
+              onChange={(e) => {
+                setBusca(e.target.value);
+                reiniciarPagina();
+              }}
+              className="sm:max-w-md"
+            />
+          </ToolbarFiltros>
         </CardHeader>
         <CardContent>
           {isLoading ? <Skeleton className="h-40 w-full" /> : null}
@@ -92,74 +94,62 @@ export default function PaginaPagamentos() {
           ) : null}
           {!isLoading && !isError && fatia.length > 0 ? (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>End-to-end</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Txid</TableHead>
-                    <TableHead>Provedor</TableHead>
-                    <TableHead>Recebido em</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {fatia.map((pagamento) => (
-                    <TableRow key={pagamento.id}>
-                      <TableCell className="font-mono text-xs">
-                        {pagamento.endToEndId}
-                      </TableCell>
-                      <TableCell>{formatarMoeda(pagamento.valorCentavos)}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            pagamento.status === 'ESTORNADO' ? 'erro' : 'sucesso'
-                          }
-                        >
-                          {pagamento.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {pagamento.txid ?? '-'}
-                      </TableCell>
-                      <TableCell>{pagamento.provedor?.nome ?? '-'}</TableCell>
-                      <TableCell>{formatarData(pagamento.recebidoEm)}</TableCell>
+              <TabelaResponsiva>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>End-to-end</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Txid</TableHead>
+                      <TableHead>Provedor</TableHead>
+                      <TableHead>Recebido em</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <div className="mt-4 flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  {filtrados.length} resultado(s)
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={paginaAtual <= 1}
-                    onClick={() => setPagina((p) => p - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <span className="self-center text-sm text-muted-foreground">
-                    {paginaAtual}/{totalPaginas}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={paginaAtual >= totalPaginas}
-                    onClick={() => setPagina((p) => p + 1)}
-                  >
-                    Próxima
-                  </Button>
-                </div>
-              </div>
+                  </TableHeader>
+                  <TableBody>
+                    {fatia.map((pagamento) => (
+                      <TableRow key={pagamento.id}>
+                        <TableCell className="font-mono text-xs">
+                          {pagamento.endToEndId}
+                        </TableCell>
+                        <TableCell>{formatarMoeda(pagamento.valorCentavos)}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              pagamento.status === 'ESTORNADO' ? 'erro' : 'sucesso'
+                            }
+                          >
+                            {pagamento.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {pagamento.txid ?? '-'}
+                        </TableCell>
+                        <TableCell>{pagamento.provedor?.nome ?? '-'}</TableCell>
+                        <TableCell>{formatarData(pagamento.recebidoEm)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TabelaResponsiva>
+              <Paginacao
+                pagina={pagina}
+                totalPaginas={totalPaginas}
+                totalItens={totalItens}
+                onMudar={setPagina}
+              />
             </>
           ) : null}
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function PaginaPagamentos() {
+  return (
+    <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+      <ConteudoPagamentos />
+    </Suspense>
   );
 }

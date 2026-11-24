@@ -1,6 +1,7 @@
 export { requisitarApi } from './cliente';
 export { salvarToken, lerToken, limparToken } from './auth-token';
 export { ErroApi } from './erros';
+export { encerrarSessaoPorStatus } from './sessao';
 export { authServico } from './servicos/auth';
 export { organizacoesServico } from './servicos/organizacoes';
 export { cobrancasServico } from './servicos/cobrancas';

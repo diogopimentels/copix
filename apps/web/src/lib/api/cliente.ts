@@ -1,20 +1,24 @@
 import { lerToken } from './auth-token';
 import { ErroApi, extrairMensagemErro } from './erros';
+import { encerrarSessaoPorStatus } from './sessao';
 
 const URL_API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333';
 
 export type OpcoesRequisicao = Omit<RequestInit, 'body'> & {
   body?: unknown;
+  /** Quando true, não dispara logout automático em 401/403 (ex.: /auth/entrar). */
+  ignorarSessaoExpirada?: boolean;
 };
 
 export async function requisitarApi<T>(
   caminho: string,
   opcoes: OpcoesRequisicao = {},
 ): Promise<T> {
+  const { ignorarSessaoExpirada, body, headers: headersOpcao, ...rest } = opcoes;
   const token = lerToken();
-  const headers = new Headers(opcoes.headers);
+  const headers = new Headers(headersOpcao);
 
-  if (!headers.has('Content-Type') && opcoes.body !== undefined) {
+  if (!headers.has('Content-Type') && body !== undefined) {
     headers.set('Content-Type', 'application/json');
   }
 
@@ -23,20 +27,26 @@ export async function requisitarApi<T>(
   }
 
   const resposta = await fetch(`${URL_API}${caminho}`, {
-    ...opcoes,
+    ...rest,
     headers,
     body:
-      opcoes.body === undefined
+      body === undefined
         ? undefined
-        : typeof opcoes.body === 'string'
-          ? opcoes.body
-          : JSON.stringify(opcoes.body),
+        : typeof body === 'string'
+          ? body
+          : JSON.stringify(body),
   });
 
   const corpo = await resposta.json().catch(() => ({}));
 
   if (!resposta.ok) {
-    throw new ErroApi(extrairMensagemErro(corpo), resposta.status);
+    const mensagem = extrairMensagemErro(corpo);
+
+    if (!ignorarSessaoExpirada) {
+      encerrarSessaoPorStatus(resposta.status, mensagem);
+    }
+
+    throw new ErroApi(mensagem, resposta.status);
   }
 
   return corpo as T;

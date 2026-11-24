@@ -1,11 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { PageHeader } from '@/components/shared/page-header';
 import { EstadoErro } from '@/components/shared/estado-erro';
 import { EstadoVazio } from '@/components/shared/estado-vazio';
+import { SegredoMascarado } from '@/components/shared/segredo-mascarado';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -40,6 +43,7 @@ export default function PaginaConfiguracoes() {
   const criarOrg = useCriarOrganizacao();
   const criarProvedor = useCriarProvedor(organizacaoId);
   const definirOrganizacaoId = useOrganizacaoStore((s) => s.definirOrganizacaoId);
+  const [confirmarProvedor, setConfirmarProvedor] = useState(false);
 
   const formOrg = useForm<DadosCriarOrganizacao>({
     resolver: zodResolver(schemaCriarOrganizacao),
@@ -62,6 +66,7 @@ export default function PaginaConfiguracoes() {
     try {
       await criarProvedor.mutateAsync('Simulador adicional');
       toast.success('Provedor criado');
+      setConfirmarProvedor(false);
     } catch (erro) {
       toast.error(erro instanceof Error ? erro.message : 'Erro ao criar provedor');
     }
@@ -166,7 +171,7 @@ export default function PaginaConfiguracoes() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => void onCriarProvedor()}
+                onClick={() => setConfirmarProvedor(true)}
                 disabled={criarProvedor.isPending}
               >
                 Novo simulador
@@ -191,8 +196,11 @@ export default function PaginaConfiguracoes() {
                         <TableCell>{provedor.nome}</TableCell>
                         <TableCell>{provedor.tipo}</TableCell>
                         <TableCell>{provedor.ativo ? 'sim' : 'não'}</TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {provedor.chaveWebhook}
+                        <TableCell>
+                          <SegredoMascarado
+                            valor={provedor.chaveWebhook}
+                            rotulo="Chave webhook"
+                          />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -236,6 +244,16 @@ export default function PaginaConfiguracoes() {
           </Card>
         </>
       ) : null}
+
+      <ConfirmDialog
+        aberto={confirmarProvedor}
+        titulo="Criar provedor simulador?"
+        descricao="Vai gerar um novo provedor do tipo SIMULADOR com chave webhook própria para esta organização."
+        confirmarLabel="Criar provedor"
+        carregando={criarProvedor.isPending}
+        onCancelar={() => setConfirmarProvedor(false)}
+        onConfirmar={onCriarProvedor}
+      />
     </div>
   );
 }

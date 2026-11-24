@@ -42,6 +42,10 @@ src/
 - UI global: Zustand (`organizacaoId`, menu)
 - Forms: React Hook Form + Zod
 - Auth: Bearer + `localStorage` (ADR 001)
+- Sessão: `requisitarApi` encerra sessão em 401/403 (toast + redirect `/login`)
+- Listagens: filtro/paginação no **client** (`useListaPaginada` + `searchParams`); série do dashboard documentada como “últimos N da lista atual”
+- Segredos: `chaveWebhook` mascarada por padrão (`SegredoMascarado`)
+- Ações sensíveis: `ConfirmDialog` (simular Pix, criar provedor)
 
 ## Scripts
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ITENS_NAVEGACAO } from '@/lib/navegacao';
@@ -10,6 +11,26 @@ export function Sidebar() {
   const pathname = usePathname();
   const menuAberto = useUiStore((s) => s.menuAberto);
   const fecharMenu = useUiStore((s) => s.fecharMenu);
+
+  useEffect(() => {
+    if (!menuAberto) return;
+
+    function aoTeclar(evento: KeyboardEvent) {
+      if (evento.key === 'Escape') fecharMenu();
+    }
+
+    window.addEventListener('keydown', aoTeclar);
+    return () => window.removeEventListener('keydown', aoTeclar);
+  }, [menuAberto, fecharMenu]);
+
+  useEffect(() => {
+    if (!menuAberto) return;
+    const anterior = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = anterior;
+    };
+  }, [menuAberto]);
 
   return (
     <>
@@ -23,6 +44,8 @@ export function Sidebar() {
       />
 
       <aside
+        id="menu-principal"
+        aria-label="Menu de navegação"
         className={cn(
           'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar transition-transform md:static md:translate-x-0',
           menuAberto ? 'translate-x-0' : '-translate-x-full',

@@ -25,6 +25,9 @@ test.describe('fluxo principal Copix', () => {
     await page.getByRole('link', { name: 'Cobranças' }).click();
     await expect(page.getByRole('heading', { name: 'Cobranças' })).toBeVisible();
 
+    await page.getByRole('button', { name: 'Nova cobrança' }).click();
+    await expect(page.getByRole('heading', { name: 'Nova cobrança' })).toBeVisible();
+
     const descricao = `E2E pedido ${Date.now()}`;
     await page.getByLabel('Descrição').fill(descricao);
     await page.getByLabel('Valor (BRL)').fill('42,50');
@@ -34,6 +37,7 @@ test.describe('fluxo principal Copix', () => {
 
     const linha = page.getByRole('row').filter({ hasText: descricao });
     await linha.getByRole('button', { name: 'Simular Pix' }).click();
+    await page.getByRole('button', { name: 'Simular agora' }).click();
     await expect(linha.getByText('PAGA')).toBeVisible({ timeout: 15_000 });
 
     await page.getByRole('link', { name: 'Pagamentos' }).click();
@@ -46,4 +50,3 @@ test.describe('fluxo principal Copix', () => {
     ).toBeVisible({ timeout: 15_000 });
   });
 });
-
