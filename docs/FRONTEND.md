@@ -2,9 +2,10 @@
 
 ## Identidade
 
-- Light content + sidebar grafite (fintech B2B)
-- Tipografia: Inter (UI) + JetBrains Mono (valores/ids)
-- Accent teal (`#0F766E`) com propósito; superfícies sem sombra decorativa
+- Shell claro (sidebar branca + fundo `#F7F8FA`)
+- Tipografia: IBM Plex Sans (UI) + IBM Plex Mono só em IDs/códigos
+- Acento teal (`#0B6E63`) só em CTA/estados; sem sombras decorativas
+- Copy de produto (sem jargão técnico na UI)
 - Tokens em `app/globals.css`
 
 ## Rotas

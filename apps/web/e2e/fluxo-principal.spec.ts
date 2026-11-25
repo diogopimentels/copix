@@ -12,7 +12,7 @@ async function fazerLogin(page: import('@playwright/test').Page) {
 test.describe('fluxo principal Copix', () => {
   test('login e navegação do dashboard', async ({ page }) => {
     await fazerLogin(page);
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Visão geral' })).toBeVisible();
 
     await page.getByRole('link', { name: 'Cobranças' }).click();
     await expect(page).toHaveURL(/\/cobrancas/);

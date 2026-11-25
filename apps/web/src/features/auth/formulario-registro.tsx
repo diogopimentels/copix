@@ -35,51 +35,56 @@ export function FormularioRegistro() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5" noValidate>
-      <div className="grid gap-2">
-        <Label htmlFor="nome">Nome</Label>
-        <Input id="nome" autoComplete="name" {...register('nome')} />
-        {errors.nome ? (
-          <p className="text-sm text-destructive">{errors.nome.message}</p>
-        ) : null}
-      </div>
+    <div className="grid gap-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
+        <div className="grid gap-2">
+          <Label htmlFor="nome">Nome</Label>
+          <Input id="nome" autoComplete="name" {...register('nome')} />
+          {errors.nome ? (
+            <p className="text-sm text-destructive">{errors.nome.message}</p>
+          ) : null}
+        </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="email">E-mail</Label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          {...register('email')}
-        />
-        {errors.email ? (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
-        ) : null}
-      </div>
+        <div className="grid gap-2">
+          <Label htmlFor="email">E-mail</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            {...register('email')}
+          />
+          {errors.email ? (
+            <p className="text-sm text-destructive">{errors.email.message}</p>
+          ) : null}
+        </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="senha">Senha</Label>
-        <Input
-          id="senha"
-          type="password"
-          autoComplete="new-password"
-          {...register('senha')}
-        />
-        {errors.senha ? (
-          <p className="text-sm text-destructive">{errors.senha.message}</p>
-        ) : null}
-      </div>
+        <div className="grid gap-2">
+          <Label htmlFor="senha">Senha</Label>
+          <Input
+            id="senha"
+            type="password"
+            autoComplete="new-password"
+            {...register('senha')}
+          />
+          {errors.senha ? (
+            <p className="text-sm text-destructive">{errors.senha.message}</p>
+          ) : null}
+        </div>
 
-      <Button type="submit" className="w-full" disabled={registrar.isPending}>
-        {registrar.isPending ? 'Criando...' : 'Criar conta'}
-      </Button>
+        <Button type="submit" className="w-full" disabled={registrar.isPending}>
+          {registrar.isPending ? 'Criando...' : 'Criar conta'}
+        </Button>
+      </form>
 
       <p className="text-sm text-muted-foreground">
         Já tem conta?{' '}
-        <Link href="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link
+          href="/login"
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
           Entrar
         </Link>
       </p>
-    </form>
+    </div>
   );
 }

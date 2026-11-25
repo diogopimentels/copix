@@ -81,7 +81,7 @@ function ConteudoConciliacoes() {
     <div className="grid gap-6">
       <PageHeader
         titulo="Conciliações"
-        descricao="Compare cobrança e pagamento. Divergência de valor fica explícita."
+        descricao="Acompanhe o pareamento entre cobranças e pagamentos."
         acoes={
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="outline" asChild>
@@ -162,8 +162,8 @@ function ConteudoConciliacoes() {
               }
               descricao={
                 status === 'DIVERGENTE'
-                  ? 'Bom sinal — não há pares com valor diferente.'
-                  : 'Crie uma cobrança e simule o Pix para gerar o primeiro pareamento.'
+                  ? 'Nenhum par com valor diferente no momento.'
+                  : 'Quando houver cobranças e pagamentos relacionados, eles aparecem aqui.'
               }
             />
           ) : null}

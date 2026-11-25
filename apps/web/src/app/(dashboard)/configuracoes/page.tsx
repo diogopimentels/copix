@@ -76,7 +76,7 @@ export default function PaginaConfiguracoes() {
     <div className="grid gap-6">
       <PageHeader
         titulo="Configurações"
-        descricao="Organização, provedores Pix (simulador) e conta. Sem features inventadas."
+        descricao="Conta, organização e provedores Pix."
       />
 
       <Card>
@@ -174,7 +174,7 @@ export default function PaginaConfiguracoes() {
                 onClick={() => setConfirmarProvedor(true)}
                 disabled={criarProvedor.isPending}
               >
-                Novo simulador
+                Novo provedor
               </Button>
             </CardHeader>
             <CardContent>
@@ -187,7 +187,7 @@ export default function PaginaConfiguracoes() {
                       <TableHead>Nome</TableHead>
                       <TableHead>Tipo</TableHead>
                       <TableHead>Ativo</TableHead>
-                      <TableHead>Chave webhook</TableHead>
+                      <TableHead>Chave secreta</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -199,7 +199,7 @@ export default function PaginaConfiguracoes() {
                         <TableCell>
                           <SegredoMascarado
                             valor={provedor.chaveWebhook}
-                            rotulo="Chave webhook"
+                            rotulo="Chave secreta"
                           />
                         </TableCell>
                       </TableRow>
@@ -207,10 +207,6 @@ export default function PaginaConfiguracoes() {
                   </TableBody>
                 </Table>
               )}
-              <p className="mt-3 text-xs text-muted-foreground">
-                Endpoint público: POST /webhooks/pix/:provedorId com header
-                x-copix-signature.
-              </p>
             </CardContent>
           </Card>
 
@@ -238,7 +234,7 @@ export default function PaginaConfiguracoes() {
                 </TableBody>
               </Table>
               <p className="mt-3 text-xs text-muted-foreground">
-                Convite de membros ainda não existe na API — lista só leitura.
+                Apenas visualização. Convites ainda não estão disponíveis.
               </p>
             </CardContent>
           </Card>
@@ -247,8 +243,8 @@ export default function PaginaConfiguracoes() {
 
       <ConfirmDialog
         aberto={confirmarProvedor}
-        titulo="Criar provedor simulador?"
-        descricao="Vai gerar um novo provedor do tipo SIMULADOR com chave webhook própria para esta organização."
+        titulo="Criar provedor?"
+        descricao="Um novo provedor Pix será criado para esta organização, com chave secreta própria."
         confirmarLabel="Criar provedor"
         carregando={criarProvedor.isPending}
         onCancelar={() => setConfirmarProvedor(false)}

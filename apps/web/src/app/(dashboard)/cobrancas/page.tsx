@@ -99,7 +99,7 @@ function ConteudoCobrancas() {
     <div className="grid gap-6">
       <PageHeader
         titulo="Cobranças"
-        descricao="Emita cobranças Pix, acompanhe status e simule recebimento."
+        descricao="Crie e acompanhe cobranças Pix."
         acoes={
           <Dialog open={dialogCriarAberto} onOpenChange={setDialogCriarAberto}>
             <DialogTrigger asChild>
@@ -109,7 +109,7 @@ function ConteudoCobrancas() {
               <DialogHeader>
                 <DialogTitle>Nova cobrança</DialogTitle>
                 <DialogDescription>
-                  Valores são convertidos para centavos antes de ir à API.
+                  Informe a descrição e o valor em reais.
                 </DialogDescription>
               </DialogHeader>
               <FormularioCriarCobranca

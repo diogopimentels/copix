@@ -62,7 +62,7 @@ function ConteudoLancamentos() {
     <div className="grid gap-6">
       <PageHeader
         titulo="Lançamentos"
-        descricao="Extrato do razão. Valores sempre em centavos no backend."
+        descricao="Extrato financeiro da organização."
       />
 
       <section className="grid gap-4 sm:grid-cols-3">

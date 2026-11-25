@@ -10,7 +10,6 @@ type Props = {
   className?: string;
 };
 
-/** Indicador financeiro sem “card idêntico” obrigatório — hierarquia via destaque. */
 export function Kpi({
   rotulo,
   valor,
@@ -22,15 +21,15 @@ export function Kpi({
   return (
     <div
       className={cn(
-        'rounded-lg border border-border bg-card px-4 py-3.5',
-        destaque && 'border-primary/25 bg-primary/[0.03]',
+        'min-w-0 px-4 py-3',
+        destaque && 'bg-primary/[0.03]',
         className,
       )}
     >
       <p className="text-xs font-medium text-muted-foreground">{rotulo}</p>
       <p
         className={cn(
-          'mt-1.5 texto-financeiro text-2xl font-semibold tracking-tight',
+          'mt-1 texto-financeiro text-[28px] font-semibold leading-tight',
           tom === 'alerta' && 'text-destructive',
           tom === 'sucesso' && 'text-sucesso',
           tom === 'padrao' && 'text-foreground',

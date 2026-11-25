@@ -10,7 +10,7 @@ export function PageHeader({ titulo, descricao, acoes }: Props) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
+        <h1 className="text-[22px] font-semibold tracking-tight text-foreground">
           {titulo}
         </h1>
         {descricao ? (

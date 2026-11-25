@@ -58,7 +58,7 @@ function ConteudoAuditoria() {
     <div className="grid gap-6">
       <PageHeader
         titulo="Auditoria"
-        descricao="Últimas ações registradas pela API (até 100 eventos)."
+        descricao="Registro das ações recentes na organização."
       />
 
       <Card>
@@ -89,7 +89,7 @@ function ConteudoAuditoria() {
           {!isLoading && !isError && fatia.length === 0 ? (
             <EstadoVazio
               titulo="Sem eventos"
-              descricao="Ações como login, criação de cobrança e webhooks aparecem aqui."
+              descricao="As ações da equipe e do sistema aparecem aqui."
             />
           ) : null}
           {!isLoading && !isError && fatia.length > 0 ? (

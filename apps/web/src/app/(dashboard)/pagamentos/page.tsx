@@ -58,7 +58,7 @@ function ConteudoPagamentos() {
     <div className="grid gap-6">
       <PageHeader
         titulo="Pagamentos"
-        descricao="Histórico de Pix recebidos via webhook ou simulador."
+        descricao="Pagamentos Pix recebidos pela organização."
       />
 
       <Card>
@@ -89,7 +89,7 @@ function ConteudoPagamentos() {
           {!isLoading && !isError && fatia.length === 0 ? (
             <EstadoVazio
               titulo="Nenhum pagamento"
-              descricao="Simule um Pix a partir de uma cobrança pendente."
+              descricao="Quando houver recebimentos Pix, eles aparecem aqui."
             />
           ) : null}
           {!isLoading && !isError && fatia.length > 0 ? (

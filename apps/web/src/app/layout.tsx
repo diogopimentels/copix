@@ -1,19 +1,20 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
 import { AppProviders } from '@/providers/app-providers';
 import './globals.css';
 
-const fonteSans = Inter({
+const fonteSans = IBM_Plex_Sans({
   subsets: ['latin'],
-  variable: '--font-inter',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plex-sans',
   display: 'swap',
 });
 
-const fonteMono = JetBrains_Mono({
+const fonteMono = IBM_Plex_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
-  variable: '--font-jetbrains',
+  variable: '--font-plex-mono',
   display: 'swap',
 });
 
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     default: 'Copix',
     template: '%s · Copix',
   },
-  description: 'Conciliação financeira B2B para pagamentos Pix',
+  description: 'Conciliação financeira para pagamentos Pix',
 };
 
 export default function RootLayout({
@@ -31,8 +32,8 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   const estiloFontes = {
-    '--fonte-sans': 'var(--font-inter), "Segoe UI", system-ui, sans-serif',
-    '--fonte-mono': 'var(--font-jetbrains), ui-monospace, monospace',
+    '--fonte-sans': 'var(--font-plex-sans), "Segoe UI", system-ui, sans-serif',
+    '--fonte-mono': 'var(--font-plex-mono), ui-monospace, monospace',
   } as CSSProperties;
 
   return (

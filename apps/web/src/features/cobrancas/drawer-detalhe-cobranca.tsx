@@ -38,9 +38,7 @@ export function DrawerDetalheCobranca({ cobrancaId, aberto, onFechar }: Props) {
       <SheetContent side="right">
         <SheetHeader>
           <SheetTitle>Detalhe da cobrança</SheetTitle>
-          <SheetDescription>
-            Dados via GET /cobrancas/:id — sem ações inventadas.
-          </SheetDescription>
+          <SheetDescription>Informações da cobrança selecionada.</SheetDescription>
         </SheetHeader>
         <SheetBody>
           {detalhe.isLoading ? <Skeleton className="h-40 w-full" /> : null}

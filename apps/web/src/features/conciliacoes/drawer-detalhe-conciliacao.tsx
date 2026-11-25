@@ -44,7 +44,7 @@ export function DrawerDetalheConciliacao({ item, aberto, onFechar }: Props) {
         <SheetHeader>
           <SheetTitle>Detalhe da conciliação</SheetTitle>
           <SheetDescription>
-            Par cobrança × pagamento sem inventar ações de resolução.
+            Comparativo entre cobrança e pagamento.
           </SheetDescription>
         </SheetHeader>
         <SheetBody>

@@ -34,50 +34,57 @@ export function FormularioEntrar() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5" noValidate>
-      <div className="grid gap-2">
-        <Label htmlFor="email">E-mail</Label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          placeholder="voce@empresa.com"
-          {...register('email')}
-        />
-        {errors.email ? (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
-        ) : null}
-      </div>
+    <div className="grid gap-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
+        <div className="grid gap-2">
+          <Label htmlFor="email">E-mail</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            {...register('email')}
+          />
+          {errors.email ? (
+            <p className="text-sm text-destructive">{errors.email.message}</p>
+          ) : null}
+        </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="senha">Senha</Label>
-        <Input
-          id="senha"
-          type="password"
-          autoComplete="current-password"
-          {...register('senha')}
-        />
-        {errors.senha ? (
-          <p className="text-sm text-destructive">{errors.senha.message}</p>
-        ) : null}
-      </div>
+        <div className="grid gap-2">
+          <Label htmlFor="senha">Senha</Label>
+          <Input
+            id="senha"
+            type="password"
+            autoComplete="current-password"
+            {...register('senha')}
+          />
+          {errors.senha ? (
+            <p className="text-sm text-destructive">{errors.senha.message}</p>
+          ) : null}
+        </div>
 
-      <Button type="submit" className="w-full" disabled={entrar.isPending}>
-        {entrar.isPending ? 'Entrando...' : 'Entrar'}
-      </Button>
+        <Button type="submit" className="w-full" disabled={entrar.isPending}>
+          {entrar.isPending ? 'Entrando...' : 'Entrar'}
+        </Button>
+      </form>
 
       <p className="text-sm text-muted-foreground">
         Não tem conta?{' '}
-        <Link href="/registro" className="font-medium text-foreground underline-offset-4 hover:underline">
-          Registrar
+        <Link
+          href="/registro"
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Criar conta
         </Link>
       </p>
 
-      <div className="rounded-md border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
-        Ambiente demo:{' '}
-        <span className="font-mono text-foreground">demo@copix.local</span> /{' '}
-        <span className="font-mono text-foreground">senha123</span>
+      <div className="border-t border-border pt-5">
+        <p className="text-xs text-muted-foreground">
+          Conta de demonstração:{' '}
+          <span className="texto-codigo text-foreground">demo@copix.local</span>
+          {' · '}
+          <span className="texto-codigo text-foreground">senha123</span>
+        </p>
       </div>
-    </form>
+    </div>
   );
 }
